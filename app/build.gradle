@@ -30,5 +30,5 @@ android {
 
 dependencies {
     // WebRTC cho chiếu màn hình (MediaProjection -> PeerConnection)
-    implementation 'org.webrtc:google-webrtc:1.0.32006'
+   implementation 'io.github.webrtc-sdk:android:150.7871.01'
 }
