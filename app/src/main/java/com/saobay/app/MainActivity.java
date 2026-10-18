@@ -7,7 +7,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.app.AlertDialog;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
@@ -43,6 +42,13 @@ public class MainActivity extends Activity {
         s.setUseWideViewPort(true);
         web.setWebViewClient(new WebViewClient());
         web.setWebChromeClient(new WebChromeClient());
+        // SB_CASTBRIDGE_20261018: web gọi SaobayApp.openCast() để mở chiếu màn hình
+        web.addJavascriptInterface(new Object() {
+            @android.webkit.JavascriptInterface
+            public void openCast() {
+                runOnUiThread(() -> startActivity(new Intent(MainActivity.this, CastActivity.class)));
+            }
+        }, "SaobayApp");
 
         if (savedInstanceState != null) {
             web.restoreState(savedInstanceState);
@@ -50,10 +56,7 @@ public class MainActivity extends Activity {
             web.loadUrl(HOME);
         }
 
-        Button btnCast = findViewById(R.id.btn_cast);
-        btnCast.setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, CastActivity.class)));
-
+        // SB_NOFLOAT_20261018: bỏ nút nổi, vào chiếu màn hình từ trang live
         checkForUpdate();
     }
 
