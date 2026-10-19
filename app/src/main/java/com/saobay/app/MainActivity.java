@@ -3,6 +3,7 @@ package com.saobay.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -11,7 +12,7 @@ import android.app.AlertDialog;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import android.widget.Toast;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -27,7 +28,9 @@ public class MainActivity extends Activity {
     private static final String HOME = "https://www.saobayhighschool.workers.dev";
 
     private WebView web;
-    private SwipeRefreshLayout swipeRefresh;
+    // SB_PULLREFRESH_20261019: tự code kéo-xuống-làm-mới (không dùng thư viện ngoài)
+    private float pullStartY = -1;
+    private static final float PULL_THRESHOLD = 220; // px
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,16 +38,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         web = findViewById(R.id.webview);
-        // SB_PULLREFRESH_20261019: kéo xuống để làm mới trang
-        swipeRefresh = findViewById(R.id.swipe_refresh);
-        swipeRefresh.setOnRefreshListener(() -> {
-            web.reload();
-        });
-        swipeRefresh.setColorSchemeResources(
-                android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
@@ -52,15 +45,30 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setLoadWithOverviewMode(true);
         s.setUseWideViewPort(true);
-        web.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                // SB_PULLREFRESH_20261019: tắt vòng xoay khi tải xong
-                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
-            }
-        });
+        web.setWebViewClient(new WebViewClient());
         web.setWebChromeClient(new WebChromeClient());
+        // SB_PULLREFRESH_20261019: kéo xuống từ đầu trang để làm mới
+        web.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    // Chỉ bắt đầu theo dõi khi web đang ở đầu trang
+                    if (web.getScrollY() == 0) pullStartY = event.getY();
+                    else pullStartY = -1;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (pullStartY >= 0 && event.getY() - pullStartY > PULL_THRESHOLD) {
+                        pullStartY = -1; // tránh reload nhiều lần
+                        web.reload();
+                        Toast.makeText(MainActivity.this, "Đang làm mới...", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    pullStartY = -1;
+                    break;
+            }
+            return false; // để WebView vẫn cuộn bình thường
+        });
         // SB_CASTBRIDGE_20261018: web gọi SaobayApp.openCast() để mở chiếu màn hình
         web.addJavascriptInterface(new Object() {
             @android.webkit.JavascriptInterface
