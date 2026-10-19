@@ -27,5 +27,11 @@
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden" />
 
+        <!-- Foreground service cho MediaProjection (Android 10+) -->
+        <service
+            android:name=".ScreenCastService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
+
     </application>
 </manifest>

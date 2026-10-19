@@ -157,6 +157,13 @@ public class CastActivity extends Activity {
         btnStop.setVisibility(View.VISIBLE);
         etRoom.setEnabled(false);
         try {
+            // Android 10+: phải start foreground service type mediaProjection TRƯỚC khi capture
+            Intent svc = new Intent(this, ScreenCastService.class);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(svc);
+            } else {
+                startService(svc);
+            }
             initWebRTC();
             createOffer();
         } catch (final Exception e) {
@@ -339,6 +346,8 @@ public class CastActivity extends Activity {
         pc = null;
         factory = null;
         capturer = null;
+        // dừng foreground service
+        try { stopService(new Intent(this, ScreenCastService.class)); } catch (Exception ignored) {}
         mainHandler.post(new Runnable() {
             @Override public void run() {
                 btnStart.setVisibility(View.VISIBLE);
