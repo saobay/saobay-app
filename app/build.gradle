@@ -32,5 +32,6 @@ dependencies {
     // WebRTC cho chiếu màn hình (MediaProjection -> PeerConnection)
     implementation 'org.webrtc:google-webrtc:1.0.32006'
     // SB_PULLREFRESH_20261019: kéo xuống để làm mới
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 }
