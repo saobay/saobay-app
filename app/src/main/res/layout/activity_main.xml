@@ -1,12 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SB_NOFLOAT_20261018: bỏ nút nổi, chiếu màn hình tích hợp trong trang live -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFF7ED">
 
-    <WebView
-        android:id="@+id/webview"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-</FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_launcher"
+                android:contentDescription="Cổng trường" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvHello"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Xin chào"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvRole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#78716C"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đăng xuất" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnGrade"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="18dp"
+            android:text="📝 Chấm thi trắc nghiệm"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/btnRemind"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:text="⏰ Nhắc giờ lên lớp"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/btnWeb"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:text="🌐 Mở web SAOBAY"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/btnSync"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:text="🔄 Đồng bộ dữ liệu (lịch + đề chấm)"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvSyncStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:textColor="#57534E"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btnFloat"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
+            android:text="📸 Nút nổi chụp màn hình: TẮT"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btnUpdate"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
+            android:text="🔄 Cập nhật app"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
+            android:textColor="#A8A29E"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>
