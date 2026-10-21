@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Icon đơn giản: nút play trên nền tròn xanh -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillColor="#1e40af"
-        android:pathData="M54,54m-50,0a50,50 0 1,0 100,0a50,50 0 1,0 -100,0" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M42,36l30,18l-30,18z" />
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#7C3AED" android:pathData="M0,0h108v108h-108z"/>
+    <path android:fillColor="#F59E0B" android:pathData="M14,30h80v10h-80z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M20,40h12v44h-12z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M76,40h12v44h-12z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M32,40h44v8h-44z"/>
 </vector>

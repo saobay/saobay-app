@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFF7ED">
+
+    <!-- Phan dau GIM o tren cao (tieu de + dai chon ngay): cuon noi dung
+         ben duoi cung khong bi mat, thay yeu cau -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⏰ Nhắc giờ lên lớp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#4C1D95" />
+
+        <!-- Dai chon ngay Thu 2 - Thu 7: cham ngay nao xem lich ngay do.
+             Mac dinh la hom nay; chon ngay khac chi de xem tam, khong luu. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+            <Button android:id="@+id/day2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thứ 2" android:textSize="12sp" />
+            <Button android:id="@+id/day3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thứ 3" android:textSize="12sp" />
+            <Button android:id="@+id/day4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thứ 4" android:textSize="12sp" />
+            <Button android:id="@+id/day5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thứ 5" android:textSize="12sp" />
+            <Button android:id="@+id/day6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thứ 6" android:textSize="12sp" />
+            <Button android:id="@+id/day7" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thứ 7" android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fadeScrollbars="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <TextView
+            android:id="@+id/tvToday"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#EDE9FE"
+            android:padding="10dp"
+            android:textColor="#4C1D95"
+            android:textSize="16sp"
+            android:text="Đang đọc lịch…" />
+
+        <TextView
+            android:id="@+id/tvWeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#FEF3C7"
+            android:padding="10dp"
+            android:textColor="#78350F"
+            android:textSize="16sp"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/tvNext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#7C2D12"
+            android:textSize="14sp"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/settingsToggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="#EDE9FE"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="10dp"
+            android:text="⚙️ Cài đặt giờ ▸ (bấm để mở)"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#4C1D95" />
+
+        <!-- Phan cai dat mac dinh THU GON, bam tieu de o tren moi xo ra -->
+        <LinearLayout
+            android:id="@+id/settingsBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Giờ bắt đầu tiết 1 buổi SÁNG (vd 7:15)" />
+        <EditText
+            android:id="@+id/etStartSang"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="time"
+            android:text="07:15" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Giờ bắt đầu tiết 1 buổi CHIỀU (vd 13:00)" />
+        <EditText
+            android:id="@+id/etStartChieu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="time"
+            android:text="13:00" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Độ dài 1 tiết (phút)" />
+        <EditText
+            android:id="@+id/etLen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="45" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Ra chơi thường (phút)" />
+        <EditText
+            android:id="@+id/etBreakShort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Ra chơi dài sau tiết 2 (phút)" />
+        <EditText
+            android:id="@+id/etBreakLong"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="15" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Báo trước giờ đi làm (phút, neo vào tiết đầu tiên của buổi)" />
+        <EditText
+            android:id="@+id/etBefore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="25" />
+
+        <CheckBox
+            android:id="@+id/cbPre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Báo trước giờ đi làm (theo số phút ở trên)"
+            android:checked="true" />
+
+        <CheckBox
+            android:id="@+id/cbStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Báo đúng giờ bắt đầu mỗi tiết"
+            android:checked="true" />
+
+        <CheckBox
+            android:id="@+id/cbSpeak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đọc to nội dung khi báo (kèm chuông + rung)"
+            android:checked="true" />
+
+        <Button
+            android:id="@+id/btnSaveRemind"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="💾 Lưu cài đặt và đặt lại báo thức" />
+
+        <Button
+            android:id="@+id/btnRefreshSched"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="🔄 Tải lịch báo giảng mới từ web trường" />
+
+        <Button
+            android:id="@+id/btnBattery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="🔋 Cho phép báo khi tắt màn hình (bỏ tối ưu pin)" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textSize="13sp"
+            android:textColor="#6B7280"
+            android:text="Lịch báo giảng được tải về lưu trong máy: mất mạng vẫn báo đúng giờ. Mỗi tuần gửi file báo giảng mới cho Muse để nạp lịch tuần tiếp theo. Muốn báo thức kêu cả khi máy đang ở chế độ im lặng, hãy tăng âm lượng chuông/báo thức của máy." />
+        </LinearLayout>
+    </LinearLayout>
+    </ScrollView>
+</LinearLayout>

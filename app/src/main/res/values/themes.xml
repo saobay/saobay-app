@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dùng theme nền tảng để không cần thêm thư viện AppCompat -->
-    <style name="Theme.Saobay" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="android:statusBarColor">@android:color/black</item>
-        <item name="android:navigationBarColor">@android:color/black</item>
+    <style name="Theme.SaoBay" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#FFF7ED</item>
+        <item name="android:statusBarColor">#7C3AED</item>
     </style>
 </resources>
