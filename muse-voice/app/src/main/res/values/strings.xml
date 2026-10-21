@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Muse Voice</string>
+    <string name="admin_desc">Cho phep Muse Voice khoa/tat man hinh khi ban ra lenh bang giong noi (vi du: \"tat man hinh\"). App khong xoa du lieu, khong doi mat khau.</string>
+</resources>
