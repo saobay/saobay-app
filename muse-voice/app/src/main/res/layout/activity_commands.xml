@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFF7ED"
+    android:padding="14dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="➕ Tạo lệnh nói mới"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#4C1D95" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textSize="14sp"
+        android:text="Đặt 1 câu bạn sẽ nói, chọn việc app phải làm khi nghe thấy câu đó. Lệnh có hiệu lực ngay, không cần cài lại app. Chạm vào 1 lệnh trong danh sách để xóa." />
+
+    <EditText
+        android:id="@+id/etPhrase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Câu lệnh bạn sẽ nói — ví dụ: mở nhạc thư giãn"
+        android:textSize="16sp" />
+
+    <Spinner
+        android:id="@+id/spAction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/etParam"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:hint="Nội dung thêm: URL (nếu mở web) hoặc câu sẽ gửi/đọc"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnSaveCmd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="💾 Lưu lệnh này" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Lệnh đã tạo (chạm để xóa):"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <ListView
+        android:id="@+id/lvCommands"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
