@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFF7ED">
+
+    <!-- Thanh trang thai -->
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#7C3AED"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:text="Muse Voice — đang tải trang trò chuyện…" />
+
+    <!-- Hang nut dieu khien nhanh -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="6dp">
+
+            <Button
+                android:id="@+id/btnMic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎙 Bật giọng nói" />
+
+            <Button
+                android:id="@+id/btnStopSpeak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🔇 Dừng đọc" />
+
+            <Button
+                android:id="@+id/btnReplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🔊 Đọc lại" />
+
+            <Button
+                android:id="@+id/btnLock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🔒 Tắt màn hình" />
+
+            <Button
+                android:id="@+id/btnAdmin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="⚙️ Quyền tắt màn hình" />
+
+            <Button
+                android:id="@+id/btnSaobay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🏫 Mở SAOBAY" />
+
+            <Button
+                android:id="@+id/btnHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="💬 Về Muse" />
+
+            <Button
+                android:id="@+id/btnCommands"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="➕ Lệnh tự tạo" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Trang tro chuyen Muse (WebView) -->
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Dong hien chu dang nghe duoc -->
+    <TextView
+        android:id="@+id/transcript"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#EDE9FE"
+        android:textColor="#4C1D95"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:minHeight="44dp"
+        android:text="🎧 Bấm “Bật giọng nói”, rồi nói “Nghe này” hoặc “OK Muse” để bắt đầu; đọc nội dung, kết thúc bằng “Xong rồi” / “Gửi đi” / “Hết” / “Enter” để gửi." />
+</LinearLayout>
