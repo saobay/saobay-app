@@ -3,19 +3,31 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
         android:usesCleartextTraffic="false"
-        android:theme="@style/Theme.Saobay">
+        android:theme="@style/Theme.SaoBay">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true"
-            android:configChanges="orientation|screenSize|keyboardHidden">
+            android:label="Đăng nhập Sao Bay"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -23,15 +35,63 @@
         </activity>
 
         <activity
-            android:name=".CastActivity"
+            android:name=".MainActivity"
             android:exported="false"
-            android:configChanges="orientation|screenSize|keyboardHidden" />
+            android:launchMode="singleTop"
+            android:label="Sao Bay" />
 
-        <!-- Foreground service cho MediaProjection (Android 10+) -->
+        <activity
+            android:name=".ClassTimesActivity"
+            android:exported="false"
+            android:label="Nhắc giờ lên lớp" />
+
+        <activity
+            android:name=".GraderActivity"
+            android:exported="false"
+            android:label="Chấm thi trắc nghiệm" />
+
+        <activity
+            android:name=".ResultActivity"
+            android:exported="false"
+            android:label="Kết quả chấm" />
+
+        <activity
+            android:name=".CornerActivity"
+            android:exported="false"
+            android:label="Chỉnh 4 góc phiếu" />
+
+        <activity
+            android:name=".WebActivity"
+            android:exported="false"
+            android:label="Web SAOBAY" />
+
+        <!-- Nut noi chup man hinh app khac (MediaProjection) -->
         <service
-            android:name=".ScreenCastService"
+            android:name=".FloatService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
+
+        <!-- Doc to nhac gio khi bao thuc keo -->
+        <service
+            android:name=".ReminderService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Đọc to thông báo nhắc giờ lên lớp cho giáo viên" />
+        </service>
+
+        <receiver
+            android:name=".AlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 </manifest>

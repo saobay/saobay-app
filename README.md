@@ -1,39 +1,29 @@
-# SAOBAY — App Android trường THPT Sào Báy
+# SAOBAY — Các app Android của trường THPT Sào Báy
 
-App Android gồm 2 chức năng:
+## 📱 App "Sao Bay" (thư mục `app/`) — app cho giáo viên, viết lại 2026-10-22
 
-1. **Web trường**: mở `https://www.saobayhighschool.workers.dev` toàn màn hình (WebView).
-2. **📲 Chiếu màn hình**: dùng MediaProjection API quay màn hình điện thoại,
-   stream qua WebRTC tới máy tính đang mở `live/cast.html`
-   (tái dùng signaling có sẵn của web, không cần sửa web).
+Thay thế app SAOBAY cũ (WebRTC chiếu màn hình — đã xoá). Chức năng:
 
-## Tải APK
+1. **Đăng nhập bằng tài khoản web SAOBAY** (SĐT + mật khẩu, API `/api/v2/auth/login`).
+2. **📝 Chấm thi trắc nghiệm chạy ngay trên máy** (không cần mạng): chụp phiếu →
+   tự tìm 4 điểm định vị → nắn phối cảnh → đọc SBD/mã đề/đáp án → chấm điểm.
+   Hình học phiếu port nguyên từ `teacher/omr-grader.html` trên web
+   (phiếu BGD 2025: 40 TN + 8 Đ/S + 6 TLN; phiếu 40/50 câu ABCD).
+   Đề chấm đồng bộ từ `data/bank3/<uid>/omr-exams/` (GV giao bài / chuyển đề
+   trong teacher hub là đề sang app); kết quả lưu trong máy, xuất CSV,
+   hoặc đẩy về `data/bank2/` trên web.
+3. **⏰ Nhắc giờ lên lớp** theo lịch báo giảng GV đẩy từ teacher hub
+   (`data/reminders/<uid>.json`): báo trước giờ + đúng giờ, chuông + đọc to.
+4. **🌐 Mở web trường** trong app; **📸 nút nổi chụp màn hình** lưu vào thư viện ảnh.
+5. **🔄 Tự cập nhật** qua `downloads/saobay-version.json` trên web trường.
 
-Vào tab **Actions** → chọn lần chạy mới nhất (**Build APK**) → tải artifact
-**saobay-app-debug** → giải nén được file `app-debug.apk` → chép vào điện thoại
-và cài (cho phép "cài app không rõ nguồn gốc" 1 lần).
+Icon app: ảnh cổng trường THPT Sào Báy (bảng tên trường) cắt vuông từ ảnh thật.
 
-APK tự build lại mỗi khi push code lên nhánh `main`.
+Tải APK: https://www.saobayhighschool.workers.dev/downloads/SaoBay.apk
+(bản chính thức build bằng `build-saobay.sh` trên VM Muse — build thủ công
+aapt2+javac+d8, không Gradle, không thư viện ngoài).
 
-## Cách dùng chức năng chiếu màn hình
+## 🎙 Muse Voice (thư mục `muse-voice/`)
 
-1. Trên **máy tính**: mở `https://www.saobayhighschool.workers.dev/live/cast.html`
-   → màn hình hiện mã phòng 6 ký tự (VD: `M2G2A9`).
-2. Trên **điện thoại**: mở app SAOBAY → bấm nút **📲 Chiếu màn hình**
-   → nhập mã phòng → bấm **Bắt đầu chiếu màn hình** → chấp nhận quyền
-   "quay/chiếu màn hình".
-3. Màn hình điện thoại hiện trong khung trên máy tính → dùng OBS quay lại
-   làm video hướng dẫn.
-
-## Build thủ công (nếu cần)
-
-```bash
-# Cài Android SDK + JDK 17, rồi:
-gradle assembleDebug
-# APK: app/build/outputs/apk/debug/app-debug.apk
-```
-
-## Yêu cầu
-
-- Android 8.0 (API 26) trở lên.
-- Không cần USB Debugging, không cần root, không cần cáp.
+App trợ lý giọng nói cá nhân (chat Muse bằng giọng nói + nhắc giờ),
+project riêng, xem README trong thư mục đó.
