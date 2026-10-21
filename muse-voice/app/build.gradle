@@ -1,0 +1,34 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.musevoice.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.musevoice.app"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        debug {
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Khong dung thu vien ngoai: WebView + SpeechRecognizer + TextToSpeech
+    // deu la API san co cua Android -> APK nhe, build on dinh.
+}
