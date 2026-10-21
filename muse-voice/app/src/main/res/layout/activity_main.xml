@@ -7,7 +7,7 @@
 
     <!-- Thanh trang thai -->
     <TextView
-        android:id="@+id/status"
+        android:id="@+id/status" android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#7C3AED"
@@ -28,45 +28,10 @@
             android:padding="6dp">
 
             <Button
-                android:id="@+id/btnMic"
+                android:id="@+id/btnRemind"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🎙 Bật giọng nói" />
-
-            <Button
-                android:id="@+id/btnStopSpeak"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="🔇 Dừng đọc" />
-
-            <Button
-                android:id="@+id/btnReplay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="🔊 Đọc lại" />
-
-            <Button
-                android:id="@+id/btnLock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="🔒 Tắt màn hình" />
-
-            <Button
-                android:id="@+id/btnAdmin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="⚙️ Quyền tắt màn hình" />
-
-            <Button
-                android:id="@+id/btnSaobay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="🏫 Mở SAOBAY" />
+                android:text="⏰ Nhắc giờ dạy" />
 
             <Button
                 android:id="@+id/btnHome"
@@ -76,11 +41,103 @@
                 android:text="💬 Về Muse" />
 
             <Button
-                android:id="@+id/btnCommands"
+                android:id="@+id/btnSaobay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="➕ Lệnh tự tạo" />
+                android:text="🏫 Mở SAOBAY" />
+
+
+
+
+
+            <Button
+                android:id="@+id/btnCamera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="📸 Chụp ảnh" />
+
+            <Button
+                android:id="@+id/btnShot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🖼 Màn hình" />
+
+            <Button
+                android:id="@+id/btnFloat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="📸 Nút nổi" />
+
+            <Button
+                android:id="@+id/btnLock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🔒 Tắt màn hình" />
+
+            <Button
+                android:id="@+id/btnWeb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🌐 Web" />
+
+            <Button
+                android:id="@+id/btnUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="🔄 Cập nhật" />
+
+            <Button
+                android:id="@+id/btnSettingsToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="⚙️ Cài đặt ▸" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <HorizontalScrollView
+        android:id="@+id/settingsRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="6dp">
+
+            <Button
+            android:id="@+id/btnAdmin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="⚙️ Quyền tắt màn hình" />
+            <Button
+            android:id="@+id/btnCommands"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="➕ Lệnh tự tạo" />
+            <Button
+            android:id="@+id/btnTtsTest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="🩺 Thử giọng đọc" />
+            <Button
+            android:id="@+id/btnAutoRead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="🔊 Tự đọc trả lời: BẬT" />
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -93,7 +150,7 @@
 
     <!-- Dong hien chu dang nghe duoc -->
     <TextView
-        android:id="@+id/transcript"
+        android:id="@+id/transcript" android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#EDE9FE"
@@ -101,5 +158,31 @@
         android:textSize="15sp"
         android:padding="10dp"
         android:minHeight="44dp"
-        android:text="🎧 Bấm “Bật giọng nói”, rồi nói “Nghe này” hoặc “OK Muse” để bắt đầu; đọc nội dung, kết thúc bằng “Xong rồi” / “Gửi đi” / “Hết” / “Enter” để gửi." />
+        android:text="🎧 Bấm “Bật giọng nói”, rồi nói “Nghe này” hoặc “OK Muse” để bắt đầu; đọc nội dung, kết thúc bằng “Gửi đi” hoặc bấm nút 📤 GỬI ĐI để gửi." />
+    <!-- Thanh dia chi Web o day man hinh: an, bam nut "Web" moi hien -->
+    <LinearLayout
+        android:id="@+id/urlBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="6dp"
+        android:background="#FFFFFF"
+        android:visibility="gone">
+        <EditText
+            android:id="@+id/etUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Nhập địa chỉ web, vd: saobayhighschool.workers.dev"
+            android:inputType="textUri"
+            android:imeOptions="actionGo"
+            android:singleLine="true"
+            android:textSize="15sp" />
+        <Button
+            android:id="@+id/btnGo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="Đi ➜" />
+    </LinearLayout>
 </LinearLayout>
