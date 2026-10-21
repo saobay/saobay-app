@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MuseVoice" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#FFF7ED</item>
+        <item name="android:statusBarColor">#7C3AED</item>
+    </style>
+</resources>
