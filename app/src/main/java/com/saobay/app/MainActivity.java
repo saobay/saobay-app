@@ -173,8 +173,8 @@ public class MainActivity extends Activity {
     private void syncFloatLabel() {
         if (btnFloat != null) {
             btnFloat.setText(FloatService.running
-                    ? "📸 Nút nổi chụp màn hình: ĐANG BẬT (bấm để tắt)"
-                    : "📸 Nút nổi chụp màn hình: TẮT");
+                    ? "📸🔴 Nút nổi chụp & ghi màn hình: ĐANG BẬT (bấm để tắt)"
+                    : "📸🔴 Nút nổi chụp & ghi màn hình: TẮT");
         }
     }
 

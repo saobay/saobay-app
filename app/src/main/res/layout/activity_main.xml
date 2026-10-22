@@ -99,7 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="10dp"
-            android:text="📸 Nút nổi chụp màn hình: TẮT"
+            android:text="📸🔴 Nút nổi chụp &amp; ghi màn hình: TẮT"
             android:textSize="15sp" />
 
         <Button

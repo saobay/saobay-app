@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
@@ -15,35 +16,42 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaRecorder;
+import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 /**
- * Nut noi 📸 lo lung tren moi app: cham vao -> chup man hinh app dang xem
- * (qua MediaProjection, cap quyen 1 lan luc bat) -> luu anh vao THU VIEN
- * ANH cua may (Pictures/SaoBay) de dung lai sau (dan vao Zalo, dinh kem
- * bai giang...). Keo tha de di chuyen nut; nut tu an trong luc chup de
- * khong dinh vao anh.
+ * Cum nut noi tren moi app (cap quyen 1 lan luc bat):
+ *  - 📸 CHUP man hinh app dang xem -> luu vao thu vien anh (Pictures/SaoBay).
+ *  - 🔴 GHI man hinh -> quay video (hinh thuan, chua co tieng) -> dung lai
+ *    thi luu vao thu vien video (Movies/SaoBay). Dang quay nut doi thanh
+ *    ⏹ kem dong ho dem gio.
+ * Keo tha de di chuyen ca cum nut; cum nut tu an trong luc chup anh.
  */
 public class FloatService extends Service {
     public static boolean running = false;
@@ -51,12 +59,30 @@ public class FloatService extends Service {
     private static final String CHANNEL = "saobay_float";
     private static final int NOTIF_ID = 1001;
 
-    private WindowManager wm;
-    private TextView bubble;
+    private WindowManager windowManager;
+    private LinearLayout panel;
+    private TextView btnShot, btnRec, tvTimer;
     private WindowManager.LayoutParams params;
     private MediaProjection projection;
     private final Handler ui = new Handler(Looper.getMainLooper());
     private boolean capturing = false;
+
+    // ---- ghi man hinh ----
+    private boolean recording = false;
+    private MediaRecorder recorder;
+    private VirtualDisplay recDisplay;
+    private ParcelFileDescriptor recPfd;
+    private Uri recUri;
+    private File recFile;
+    private long recStartMs = 0;
+    private final Runnable timerTick = new Runnable() {
+        @Override public void run() {
+            if (!recording) return;
+            long s = (System.currentTimeMillis() - recStartMs) / 1000;
+            tvTimer.setText(String.format(Locale.US, "⏺ %d:%02d", s / 60, s % 60));
+            ui.postDelayed(this, 500);
+        }
+    };
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -65,7 +91,7 @@ public class FloatService extends Service {
     public void onCreate() {
         super.onCreate();
         running = true;
-        wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
     }
 
     @Override
@@ -77,8 +103,6 @@ public class FloatService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
-        // Foreground service kieu mediaProjection (Android 14+ bat buoc
-        // khai dung kieu + goi startForeground truoc khi tao projection)
         createChannel();
         Notification notif = buildNotification();
         if (Build.VERSION.SDK_INT >= 29) {
@@ -90,12 +114,10 @@ public class FloatService extends Service {
                 (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         if (mpm == null) { stopSelf(); return START_NOT_STICKY; }
         projection = mpm.getMediaProjection(resultCode, data);
-        // Android 14+: phai dang ky callback truoc khi tao VirtualDisplay;
-        // nguoi dung thu hoi quyen thi onStop goi -> dung dich vu gon gang.
         projection.registerCallback(new MediaProjection.Callback() {
             @Override public void onStop() { stopSelf(); }
         }, ui);
-        if (bubble == null) createBubble();
+        if (panel == null) createPanel();
         return START_STICKY;
     }
 
@@ -118,39 +140,75 @@ public class FloatService extends Service {
                 ? new Notification.Builder(this, CHANNEL)
                 : new Notification.Builder(this);
         return b.setContentTitle("Sao Bay — nút nổi đang bật")
-                .setContentText("Chạm nút 📸 nổi để chụp màn hình app đang xem, ảnh lưu vào thư viện ảnh của máy.")
+                .setContentText("📸 chụp màn hình / 🔴 ghi màn hình, lưu vào thư viện của máy.")
                 .setSmallIcon(android.R.drawable.ic_menu_camera)
                 .setContentIntent(pi)
                 .build();
     }
 
-    private void createBubble() {
-        bubble = new TextView(this);
-        bubble.setText("📸");
-        bubble.setTextSize(26);
-        bubble.setGravity(Gravity.CENTER);
+    private TextView makeBubble(String emoji, int sizeDp, int color) {
+        TextView tv = new TextView(this);
+        tv.setText(emoji);
+        tv.setTextSize(sizeDp >= 56 ? 26 : 22);
+        tv.setGravity(Gravity.CENTER);
         GradientDrawable bg = new GradientDrawable();
         bg.setShape(GradientDrawable.OVAL);
-        bg.setColor(Color.parseColor("#7C3AED"));
+        bg.setColor(color);
         bg.setStroke(3, Color.WHITE);
-        bubble.setBackground(bg);
-        bubble.setAlpha(0.92f);
+        tv.setBackground(bg);
+        tv.setAlpha(0.94f);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(sizeDp), dp(sizeDp));
+        tv.setLayoutParams(lp);
+        return tv;
+    }
 
-        int size = dp(60);
+    private void createPanel() {
+        panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setGravity(Gravity.CENTER_HORIZONTAL);
+
+        btnShot = makeBubble("📸", 60, Color.parseColor("#7C3AED"));
+        btnRec = makeBubble("🔴", 52, Color.parseColor("#991B1B"));
+        LinearLayout.LayoutParams recLp = (LinearLayout.LayoutParams) btnRec.getLayoutParams();
+        recLp.topMargin = dp(8);
+        btnRec.setLayoutParams(recLp);
+
+        tvTimer = new TextView(this);
+        tvTimer.setTextColor(Color.WHITE);
+        tvTimer.setTextSize(12);
+        tvTimer.setGravity(Gravity.CENTER);
+        tvTimer.setPadding(dp(6), dp(2), dp(6), dp(2));
+        GradientDrawable tbg = new GradientDrawable();
+        tbg.setColor(Color.parseColor("#CC111827"));
+        tbg.setCornerRadius(dp(8));
+        tvTimer.setBackground(tbg);
+        tvTimer.setVisibility(View.GONE);
+        LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        tLp.topMargin = dp(6);
+        tvTimer.setLayoutParams(tLp);
+
+        panel.addView(btnShot);
+        panel.addView(btnRec);
+        panel.addView(tvTimer);
+
         int type = Build.VERSION.SDK_INT >= 26
                 ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                 : WindowManager.LayoutParams.TYPE_PHONE;
         params = new WindowManager.LayoutParams(
-                size, size, type,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                type,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
         DisplayMetrics m = new DisplayMetrics();
-        wm.getDefaultDisplay().getRealMetrics(m);
-        params.x = m.widthPixels - size - dp(10);
+        windowManager.getDefaultDisplay().getRealMetrics(m);
+        params.x = m.widthPixels - dp(70);
         params.y = dp(220);
 
-        bubble.setOnTouchListener(new View.OnTouchListener() {
+        // Cham = bam nut (xac dinh nut theo toa do), keo = di chuyen ca cum
+        panel.setOnTouchListener(new View.OnTouchListener() {
             private int startX, startY;
             private float touchX, touchY;
             private long downAt;
@@ -172,25 +230,33 @@ public class FloatService extends Service {
                         if (dragged) {
                             params.x = startX + dx;
                             params.y = startY + dy;
-                            try { wm.updateViewLayout(bubble, params); } catch (Exception ignored) {}
+                            try { windowManager.updateViewLayout(panel, params); } catch (Exception ignored) {}
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if (!dragged && System.currentTimeMillis() - downAt < 500) onBubbleTap();
+                        if (!dragged && System.currentTimeMillis() - downAt < 600) {
+                            float y = e.getY();
+                            if (y >= btnRec.getTop() && y <= btnRec.getBottom()) onRecTap();
+                            else onShotTap();
+                        }
                         return true;
                     default:
                         return false;
                 }
             }
         });
-        wm.addView(bubble, params);
+        windowManager.addView(panel, params);
     }
 
-    private void onBubbleTap() {
+    // ------------------------------------------------------------ chup man hinh
+    private void onShotTap() {
         if (capturing || projection == null) return;
+        if (recording) {
+            Toast.makeText(this, "Đang ghi màn hình — hãy dừng ghi trước khi chụp.", Toast.LENGTH_LONG).show();
+            return;
+        }
         capturing = true;
-        // An nut noi truoc khi chup de nut khong dinh vao anh
-        bubble.setVisibility(View.INVISIBLE);
+        panel.setVisibility(View.INVISIBLE);
         ui.postDelayed(this::captureOnce, 300);
     }
 
@@ -198,7 +264,7 @@ public class FloatService extends Service {
         ImageReader reader = null;
         try {
             DisplayMetrics m = new DisplayMetrics();
-            wm.getDefaultDisplay().getRealMetrics(m);
+            windowManager.getDefaultDisplay().getRealMetrics(m);
             final int w = m.widthPixels, h = m.heightPixels;
             reader = ImageReader.newInstance(w, h, PixelFormat.RGBA_8888, 2);
             final ImageReader fr = reader;
@@ -214,7 +280,7 @@ public class FloatService extends Service {
                     Bitmap bmp = imageToBitmap(img, w, h);
                     img.close();
                     finishCapture(fr, holder[0]);
-                    deliver(bmp);
+                    deliverShot(bmp);
                 } catch (Exception e) {
                     finishCapture(fr, holder[0]);
                     failCapture();
@@ -224,7 +290,6 @@ public class FloatService extends Service {
                     "saobay-shot", w, h, m.densityDpi,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                     reader.getSurface(), null, ui);
-            // Phong truong hop khong co khung hinh nao ve (app khoa man hinh...)
             final ImageReader timeoutReader = reader;
             ui.postDelayed(() -> {
                 if (!done[0]) {
@@ -269,41 +334,39 @@ public class FloatService extends Service {
         try { reader.setOnImageAvailableListener(null, null); } catch (Exception ignored) {}
         try { reader.close(); } catch (Exception ignored) {}
         capturing = false;
-        if (bubble != null) bubble.setVisibility(View.VISIBLE);
+        if (panel != null) panel.setVisibility(View.VISIBLE);
     }
 
     private void failCapture() {
         capturing = false;
-        if (bubble != null) bubble.setVisibility(View.VISIBLE);
+        if (panel != null) panel.setVisibility(View.VISIBLE);
         Toast.makeText(this, "Chưa chụp được màn hình — thử lại nhé.", Toast.LENGTH_LONG).show();
     }
 
-    /** Luu anh vua chup vao thu vien (MediaStore, thu muc Pictures/SaoBay);
-     *  may cu (Android < 10) hoac loi MediaStore thi luu vao thu muc rieng
-     *  cua app. Xong mo lai Sao Bay kem thong bao. */
-    private void deliver(Bitmap bmp) {
+    /** Luu anh chup vao thu vien (Pictures/SaoBay), loi thi luu thu muc app. */
+    private void deliverShot(Bitmap bmp) {
         String where = null;
         try {
             String name = "SaoBay_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
                     .format(new Date()) + ".jpg";
-            android.content.ContentValues cv = new android.content.ContentValues();
-            cv.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, name);
-            cv.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            ContentValues cv = new ContentValues();
+            cv.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+            cv.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
             if (Build.VERSION.SDK_INT >= 29) {
-                cv.put(android.provider.MediaStore.Images.Media.RELATIVE_PATH,
+                cv.put(MediaStore.Images.Media.RELATIVE_PATH,
                         Environment.DIRECTORY_PICTURES + "/SaoBay");
-                cv.put(android.provider.MediaStore.Images.Media.IS_PENDING, 1);
+                cv.put(MediaStore.Images.Media.IS_PENDING, 1);
             }
-            android.net.Uri uri = getContentResolver().insert(
-                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
+            Uri uri = getContentResolver().insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
             if (uri == null) throw new Exception("MediaStore tra null");
-            java.io.OutputStream os = getContentResolver().openOutputStream(uri);
+            OutputStream os = getContentResolver().openOutputStream(uri);
             if (os == null) throw new Exception("khong mo duoc OutputStream");
             bmp.compress(Bitmap.CompressFormat.JPEG, 92, os);
             os.close();
             if (Build.VERSION.SDK_INT >= 29) {
                 cv.clear();
-                cv.put(android.provider.MediaStore.Images.Media.IS_PENDING, 0);
+                cv.put(MediaStore.Images.Media.IS_PENDING, 0);
                 getContentResolver().update(uri, cv, null, null);
             }
             where = "thư viện ảnh (Pictures/SaoBay)";
@@ -329,6 +392,125 @@ public class FloatService extends Service {
         try { startActivity(open); } catch (Exception ignored) {}
     }
 
+    // ------------------------------------------------------------ ghi man hinh
+    private void onRecTap() {
+        if (capturing || projection == null) return;
+        if (recording) stopRecording(true);
+        else startRecording();
+    }
+
+    private void startRecording() {
+        try {
+            DisplayMetrics m = new DisplayMetrics();
+            windowManager.getDefaultDisplay().getRealMetrics(m);
+            int w = m.widthPixels, h = m.heightPixels;
+            float scale = Math.min(1f, 1600f / Math.max(w, h));
+            w = Math.round(w * scale) & ~1;
+            h = Math.round(h * scale) & ~1;
+
+            String name = "SaoBay_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+                    .format(new Date()) + ".mp4";
+            recUri = null;
+            recPfd = null;
+            recFile = null;
+            if (Build.VERSION.SDK_INT >= 29) {
+                ContentValues cv = new ContentValues();
+                cv.put(MediaStore.Video.Media.DISPLAY_NAME, name);
+                cv.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+                cv.put(MediaStore.Video.Media.RELATIVE_PATH,
+                        Environment.DIRECTORY_MOVIES + "/SaoBay");
+                cv.put(MediaStore.Video.Media.IS_PENDING, 1);
+                recUri = getContentResolver().insert(
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, cv);
+                if (recUri != null) {
+                    recPfd = getContentResolver().openFileDescriptor(recUri, "w");
+                }
+            }
+            if (recPfd == null) {
+                File dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES);
+                if (dir == null) dir = getFilesDir();
+                recFile = new File(dir, name);
+            }
+
+            recorder = new MediaRecorder();
+            recorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            if (recPfd != null) recorder.setOutputFile(recPfd.getFileDescriptor());
+            else recorder.setOutputFile(recFile.getAbsolutePath());
+            recorder.setVideoSize(w, h);
+            recorder.setVideoFrameRate(30);
+            recorder.setVideoEncodingBitRate(6_000_000);
+            recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            recorder.prepare();
+
+            recDisplay = projection.createVirtualDisplay(
+                    "saobay-rec", w, h, m.densityDpi,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                    recorder.getSurface(), null, ui);
+            recorder.start();
+
+            recording = true;
+            recStartMs = System.currentTimeMillis();
+            btnRec.setText("⏹");
+            tvTimer.setVisibility(View.VISIBLE);
+            tvTimer.setText("⏺ 0:00");
+            ui.post(timerTick);
+            Toast.makeText(this, "🔴 Đang ghi màn hình… Chạm nút ⏹ để dừng và lưu video.", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            cleanupRecorder();
+            Toast.makeText(this, "Chưa ghi được màn hình (" + e.getMessage()
+                    + "). Nếu vừa chụp ảnh xong, hãy tắt nút nổi rồi bật lại (cấp quyền mới) rồi ghi.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void stopRecording(boolean save) {
+        if (!recording) return;
+        recording = false;
+        ui.removeCallbacks(timerTick);
+        tvTimer.setVisibility(View.GONE);
+        btnRec.setText("🔴");
+        try {
+            if (recorder != null) recorder.stop();
+        } catch (Exception e) {
+            save = false; // dung qua som -> file hong
+        }
+        cleanupRecorder();
+        if (recUri != null) {
+            try {
+                if (save) {
+                    ContentValues cv = new ContentValues();
+                    cv.put(MediaStore.Video.Media.IS_PENDING, 0);
+                    getContentResolver().update(recUri, cv, null, null);
+                    Toast.makeText(this, "🎬 Đã lưu video vào thư viện (Movies/SaoBay).", Toast.LENGTH_LONG).show();
+                } else {
+                    getContentResolver().delete(recUri, null, null);
+                    Toast.makeText(this, "Đã huỷ đoạn ghi (quá ngắn hoặc lỗi).", Toast.LENGTH_LONG).show();
+                }
+            } catch (Exception ignored) {}
+            recUri = null;
+        } else if (recFile != null) {
+            if (save) {
+                final File f = recFile;
+                MediaScannerConnection.scanFile(this, new String[]{f.getAbsolutePath()},
+                        new String[]{"video/mp4"}, null);
+                Toast.makeText(this, "🎬 Đã lưu video: " + f.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            } else {
+                //noinspection ResultOfMethodCallIgnored
+                recFile.delete();
+            }
+            recFile = null;
+        }
+    }
+
+    private void cleanupRecorder() {
+        try { if (recDisplay != null) recDisplay.release(); } catch (Exception ignored) {}
+        recDisplay = null;
+        try { if (recorder != null) { recorder.reset(); recorder.release(); } } catch (Exception ignored) {}
+        recorder = null;
+        try { if (recPfd != null) recPfd.close(); } catch (Exception ignored) {}
+        recPfd = null;
+    }
+
     private int dp(int v) {
         return Math.round(v * getResources().getDisplayMetrics().density);
     }
@@ -336,9 +518,10 @@ public class FloatService extends Service {
     @Override
     public void onDestroy() {
         running = false;
-        if (bubble != null && wm != null) {
-            try { wm.removeView(bubble); } catch (Exception ignored) {}
-            bubble = null;
+        if (recording) stopRecording(true);
+        if (panel != null && windowManager != null) {
+            try { windowManager.removeView(panel); } catch (Exception ignored) {}
+            panel = null;
         }
         if (projection != null) {
             try { projection.stop(); } catch (Exception ignored) {}
