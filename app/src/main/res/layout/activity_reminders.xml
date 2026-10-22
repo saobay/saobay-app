@@ -5,6 +5,12 @@
     android:orientation="vertical"
     android:background="#FFF7ED">
 
+    <LinearLayout
+        android:id="@+id/navStripRemind"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
     <!-- Phan dau GIM o tren cao (tieu de + dai chon ngay): cuon noi dung
          ben duoi cung khong bi mat, thay yeu cau -->
     <LinearLayout

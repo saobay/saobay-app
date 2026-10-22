@@ -96,7 +96,8 @@ public class LoginActivity extends Activity {
                         user.optString("name", ""),
                         role,
                         token,
-                        user.optString("phone", phone));
+                        user.optString("phone", phone),
+                        user.optString("class_name", ""));
                 runOnUiThread(this::goMain);
             } catch (Exception e) {
                 runOnUiThread(() -> {

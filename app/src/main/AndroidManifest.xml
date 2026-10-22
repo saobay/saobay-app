@@ -58,6 +58,12 @@
             android:label="Kết quả chấm" />
 
         <activity
+            android:name=".CaptureActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="Quét phiếu trực tiếp" />
+
+        <activity
             android:name=".CornerActivity"
             android:exported="false"
             android:label="Chỉnh 4 góc phiếu" />

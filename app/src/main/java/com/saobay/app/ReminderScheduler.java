@@ -31,7 +31,7 @@ public class ReminderScheduler {
             }
         }
 
-        List<ReminderStore.Alert> alerts = ReminderStore.buildAlerts(ctx, 14);
+        List<ReminderStore.Alert> alerts = ReminderStore.buildAlerts(ctx, 7);
         boolean exact = Build.VERSION.SDK_INT < 31 || am.canScheduleExactAlarms();
         StringBuilder codes = new StringBuilder();
         for (ReminderStore.Alert a : alerts) {

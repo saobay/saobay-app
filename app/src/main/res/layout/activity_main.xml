@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="#FFF7ED">
+
+    <LinearLayout
+        android:id="@+id/navStripMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,9 +31,9 @@
             <ImageView
                 android:layout_width="52dp"
                 android:layout_height="52dp"
-                android:scaleType="centerCrop"
+                android:scaleType="fitCenter"
                 android:src="@drawable/ic_launcher"
-                android:contentDescription="Cổng trường" />
+                android:contentDescription="Trường THPT Sào Báy" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -120,3 +132,4 @@
             android:textSize="12sp" />
     </LinearLayout>
 </ScrollView>
+</LinearLayout>

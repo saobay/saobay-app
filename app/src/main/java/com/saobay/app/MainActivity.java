@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
             return;
         }
         setContentView(R.layout.activity_main);
+        NavStrip.build(this, findViewById(R.id.navStripMain), "main");
         tvHello = findViewById(R.id.tvHello);
         tvRole = findViewById(R.id.tvRole);
         tvSyncStatus = findViewById(R.id.tvSyncStatus);

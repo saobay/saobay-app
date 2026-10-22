@@ -12,10 +12,11 @@
 
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="190dp"
-            android:scaleType="centerCrop"
+            android:layout_height="150dp"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_launcher"
-            android:contentDescription="Cổng trường THPT Sào Báy" />
+            android:contentDescription="Trường THPT Sào Báy" />
 
         <TextView
             android:layout_width="match_parent"

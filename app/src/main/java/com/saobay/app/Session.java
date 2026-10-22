@@ -20,6 +20,7 @@ public class Session {
     public static String role(Context ctx)  { return prefs(ctx).getString("role", ""); }
     public static String token(Context ctx) { return prefs(ctx).getString("token", ""); }
     public static String phone(Context ctx) { return prefs(ctx).getString("phone", ""); }
+    public static String className(Context ctx) { return prefs(ctx).getString("class_name", ""); }
 
     public static boolean isTeacher(Context ctx) {
         String r = role(ctx);
@@ -28,12 +29,18 @@ public class Session {
 
     public static void save(Context ctx, String uid, String name, String role,
                             String token, String phone) {
+        save(ctx, uid, name, role, token, phone, "");
+    }
+
+    public static void save(Context ctx, String uid, String name, String role,
+                            String token, String phone, String className) {
         prefs(ctx).edit()
                 .putString("uid", uid)
                 .putString("name", name)
                 .putString("role", role)
                 .putString("token", token)
                 .putString("phone", phone)
+                .putString("class_name", className)
                 .apply();
     }
 

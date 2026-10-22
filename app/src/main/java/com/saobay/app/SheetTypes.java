@@ -4,7 +4,8 @@ package com.saobay.app;
  * Hinh hoc cac loai phieu tra loi — port NGUYEN VAN tu SHEET_TYPES trong
  * teacher/omr-grader.html tren web (SB_OMRSHEET_20261014 / SB_BGDFORM_20261014)
  * de app cham KHOP 1-1 voi phieu da in tu web. Khung chuan W x H = 1000 x 1414,
- * 4 diem dinh vi (marker) o cac goc: 3 o vuong den + 1 vong tron (goc duoi phai),
+ * 4 diem dinh vi (marker) o cac goc: phieu BGD that ca 4 deu la o vuong den dac
+ * (tim theo luat o vuong dac gan goc khung nhat — SB_MARKERCORNER_20261022),
  * tam cac marker trong khung chuan: (52,52) (948,52) (52,1362) (948,1362).
  */
 public class SheetTypes {
