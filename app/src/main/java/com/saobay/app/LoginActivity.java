@@ -61,7 +61,7 @@ public class LoginActivity extends Activity {
         final String phone = etPhone.getText().toString().trim();
         final String pass = etPass.getText().toString();
         if (phone.isEmpty() || pass.isEmpty()) {
-            tvMsg.setText("Hãy nhập cả số điện thoại và mật khẩu.");
+            tvMsg.setText("Hãy nhập tài khoản (SĐT / Gmail / mã định danh / nickname) và mật khẩu.");
             return;
         }
         tvMsg.setText("");

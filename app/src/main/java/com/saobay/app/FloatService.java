@@ -1,5 +1,6 @@
 package com.saobay.app;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -7,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -69,6 +71,7 @@ public class FloatService extends Service {
 
     // ---- ghi man hinh ----
     private boolean recording = false;
+    private boolean recHasMic = false;
     private MediaRecorder recorder;
     private VirtualDisplay recDisplay;
     private ParcelFileDescriptor recPfd;
@@ -106,7 +109,13 @@ public class FloatService extends Service {
         createChannel();
         Notification notif = buildNotification();
         if (Build.VERSION.SDK_INT >= 29) {
-            startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+            // Co quyen mic thi dang ky them kieu microphone (Android 14+ bat buoc
+            // de thu tieng tu dich vu chay nen).
+            int types = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                types |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+            }
+            startForeground(NOTIF_ID, notif, types);
         } else {
             startForeground(NOTIF_ID, notif);
         }
@@ -432,7 +441,10 @@ public class FloatService extends Service {
                 recFile = new File(dir, name);
             }
 
+            boolean mic = checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                    == PackageManager.PERMISSION_GRANTED;
             recorder = new MediaRecorder();
+            if (mic) recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             recorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             if (recPfd != null) recorder.setOutputFile(recPfd.getFileDescriptor());
@@ -441,7 +453,13 @@ public class FloatService extends Service {
             recorder.setVideoFrameRate(30);
             recorder.setVideoEncodingBitRate(6_000_000);
             recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            if (mic) {
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                recorder.setAudioEncodingBitRate(128_000);
+                recorder.setAudioSamplingRate(44_100);
+            }
             recorder.prepare();
+            recHasMic = mic;
 
             recDisplay = projection.createVirtualDisplay(
                     "saobay-rec", w, h, m.densityDpi,
@@ -455,7 +473,9 @@ public class FloatService extends Service {
             tvTimer.setVisibility(View.VISIBLE);
             tvTimer.setText("⏺ 0:00");
             ui.post(timerTick);
-            Toast.makeText(this, "🔴 Đang ghi màn hình… Chạm nút ⏹ để dừng và lưu video.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, recHasMic
+                    ? "🔴 Đang ghi màn hình (có tiếng mic)… Chạm ⏹ để dừng và lưu."
+                    : "🔴 Đang ghi màn hình KHÔNG tiếng — app chưa được cấp quyền Micro. Mở app Sao Bay cấp quyền để ghi có tiếng.", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             cleanupRecorder();
             Toast.makeText(this, "Chưa ghi được màn hình (" + e.getMessage()

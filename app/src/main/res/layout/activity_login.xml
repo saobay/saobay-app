@@ -39,15 +39,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
-            android:text="Số điện thoại (tài khoản web SAOBAY)"
+            android:text="Tài khoản web SAOBAY"
             android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Ví dụ: 0912345678"
-            android:inputType="phone"
+            android:hint="SĐT, Gmail, mã định danh hoặc nickname"
+            android:inputType="text"
             android:textSize="17sp" />
 
         <TextView

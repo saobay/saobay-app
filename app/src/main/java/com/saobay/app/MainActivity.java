@@ -32,6 +32,7 @@ import java.util.Locale;
  */
 public class MainActivity extends Activity {
     private static final int REQ_PROJECTION = 45;
+    private static final int REQ_MIC = 46;
     private static final String VERSION_URL =
             "https://www.saobayhighschool.workers.dev/downloads/saobay-version.json";
 
@@ -197,7 +198,32 @@ public class MainActivity extends Activity {
             toast("Máy không hỗ trợ quay/chụp màn hình.");
             return;
         }
+        // Quyen Micro (ghi man hinh co tieng): xin truoc khi xin quyen quay,
+        // de dich vu noi khoi dong sau khi da co quyen.
+        if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, REQ_MIC);
+            return;
+        }
+        proceedToProjection();
+    }
+
+    private void proceedToProjection() {
+        if (projMgr == null) return;
         startActivityForResult(projMgr.createScreenCaptureIntent(), REQ_PROJECTION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_MIC) {
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            if (!granted) {
+                toast("Chưa có quyền Micro: ghi màn hình sẽ không có tiếng. Vẫn bật nút nổi.");
+            }
+            if (!FloatService.running) proceedToProjection();
+        }
     }
 
     @Override
