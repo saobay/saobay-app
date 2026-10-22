@@ -35,7 +35,7 @@ import java.util.List;
  * Tim moc khong duoc thi mo man chinh goc bang tay (CornerActivity).
  */
 public class GraderActivity extends Activity {
-    private static final int REQ_CAMERA = 31, REQ_GALLERY = 32, REQ_CORNERS = 33, REQ_CAM_PERM = 34;
+    private static final int REQ_CAMERA = 31, REQ_GALLERY = 32, REQ_CORNERS = 33, REQ_CAM_PERM = 34, REQ_LIVE = 35;
 
     private Spinner spExam, spSheet;
     private TextView tvExamInfo, tvGradeStatus;
@@ -51,6 +51,7 @@ public class GraderActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grader);
+        NavStrip.build(this, findViewById(R.id.navStripGrader), "grade");
         spExam = findViewById(R.id.spExam);
         spSheet = findViewById(R.id.spSheet);
         tvExamInfo = findViewById(R.id.tvExamInfo);
@@ -83,6 +84,13 @@ public class GraderActivity extends Activity {
             @Override public void onNothingSelected(AdapterView<?> p) {}
         });
 
+        findViewById(R.id.btnLiveScan).setOnClickListener(v -> {
+            if (currentExamId().isEmpty()) {
+                toast("Chưa có đề nào để chấm — hãy đồng bộ dữ liệu từ web trước.");
+                return;
+            }
+            startActivityForResult(new Intent(this, CaptureActivity.class), REQ_LIVE);
+        });
         findViewById(R.id.btnCamera).setOnClickListener(v -> startCamera());
         findViewById(R.id.btnGallery).setOnClickListener(v -> {
             Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -214,6 +222,12 @@ public class GraderActivity extends Activity {
             Bitmap bmp = loadBitmap(data.getData());
             if (bmp != null) processPhoto(bmp);
             else toast("Không đọc được ảnh đã chọn.");
+        } else if (req == REQ_LIVE) {
+            // Man quet truc tiep tra ve anh da cat trong khung A4 — chay dung luong cham san co
+            Bitmap bmp = ScanSession.liveCapture;
+            ScanSession.liveCapture = null;
+            if (bmp != null) processPhoto(bmp);
+            else toast("Chưa có ảnh quét trực tiếp.");
         } else if (req == REQ_CORNERS) {
             if (ScanSession.cornerPtsPhoto != null && ScanSession.prepGray != null) {
                 warpAndDetect(ScanSession.cornerPtsPhoto);

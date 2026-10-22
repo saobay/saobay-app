@@ -46,6 +46,69 @@ public class OmrEngine {
         return g;
     }
 
+    /**
+     * Dung anh xam truc tiep tu mat phang Y cua frame YUV_420_888 (camera2).
+     * Mat phang Y la do sang (he so BT.601 299/587/114 — trung cong thuc toGray)
+     * nen anh xam nay dung cho OMR tuong duong anh mau da qua toGray.
+     * rotation: goc xoay THUAN chieu kim dong ho de anh dung chieu (0/90/180/270).
+     * maxDim: gioi han canh dai nhat cua anh ra (<= 0 = giu do phan giai goc).
+     * Dung cho quet truc tiep: phat hien o moc tren anh nho (maxDim ~1000)
+     * va cat anh day du luc chup (maxDim <= 0).
+     */
+    public static Gray sampleGrayFromY(byte[] yPlane, int w, int h,
+                                       int rowStride, int pixelStride,
+                                       int rotation, int maxDim) {
+        boolean swap = rotation == 90 || rotation == 270;
+        int uw = swap ? h : w, uh = swap ? w : h;
+        float s = maxDim > 0 ? Math.min(1f, (float) maxDim / Math.max(uw, uh)) : 1f;
+        int ow = Math.max(1, Math.round(uw * s)), oh = Math.max(1, Math.round(uh * s));
+        Gray g = new Gray(ow, oh);
+        for (int oy = 0; oy < oh; oy++) {
+            int uy = Math.min(uh - 1, (int) (oy / s));
+            for (int ox = 0; ox < ow; ox++) {
+                int ux = Math.min(uw - 1, (int) (ox / s));
+                int bx, by;
+                switch (rotation) {
+                    case 90:  bx = uy;          by = h - 1 - ux;  break;
+                    case 180: bx = w - 1 - ux;  by = h - 1 - uy;  break;
+                    case 270: bx = w - 1 - uy;  by = ux;          break;
+                    default:  bx = ux;          by = uy;         break;
+                }
+                int idx = by * rowStride + bx * pixelStride;
+                g.px[oy * ow + ox] = idx >= 0 && idx < yPlane.length ? yPlane[idx] & 0xff : 255;
+            }
+        }
+        return g;
+    }
+
+    /**
+     * Phat hien 4 o moc truc tiep tren frame YUV — dung NGUYEN pipeline
+     * findMarkers (mo -> nguong thich ung 51/12 -> thanh phan lien thong ->
+     * chon o theo extent/circularity) tren anh xam thu nho toi detectMaxDim,
+     * roi quy doi toa do ve he anh dung chieu day du (mk.imgW/imgH = kich
+     * thuoc anh dung chieu). pts[] theo thu tu TL TR BL BR, null neu thieu.
+     */
+    public static Markers detectMarkersFromY(byte[] yPlane, int w, int h,
+                                             int rowStride, int pixelStride,
+                                             int rotation, int detectMaxDim) {
+        Gray g = sampleGrayFromY(yPlane, w, h, rowStride, pixelStride, rotation, detectMaxDim);
+        Markers mk = findMarkers(g);
+        boolean swap = rotation == 90 || rotation == 270;
+        int uw = swap ? h : w, uh = swap ? w : h;
+        float fx = (float) uw / g.w, fy = (float) uh / g.h;
+        if (fx != 1f || fy != 1f) {
+            for (int i = 0; i < 4; i++) {
+                if (mk.pts[i] != null) {
+                    mk.pts[i][0] *= fx;
+                    mk.pts[i][1] *= fy;
+                }
+            }
+        }
+        mk.imgW = uw;
+        mk.imgH = uh;
+        return mk;
+    }
+
     /** Lam mo Gaussian gan dung (kernel 1 4 6 4 1, tach ngang/doc) nhu web. */
     static Gray blur(Gray g) {
         int w = g.w, h = g.h;
@@ -224,8 +287,14 @@ public class OmrEngine {
         return mk;
     }
 
-    /** Chon ung vien trong 1/4 khung: uu tien dung loai (vuong/tron),
-     *  o vuong uu tien extent > 0.80 (web SB_MKEXT), sau do dien tich lon nhat. */
+    /** Chon ung vien trong 1/4 khung.
+     *  SB_MARKERCORNER_20261022 (kiem chung tren phieu BGD den trang chuan thay gui):
+     *  tren phieu that TAT CA o vuong den bang nhau (~0.00054 dien tich tuong doi)
+     *  nen luat "dien tich lon nhat" bat nham o vuong phu giua phieu. Luat dung:
+     *  trong cac o VUONG DAC (extent > 0.80, khong phai tron) cua goc phan tu,
+     *  chon o GAN GOC KHUNG ANH NHAT (hoa thi lay dien tich lon hon).
+     *  Khong co o vuong dac thi moi quay ve luat cu (dung loai tron/vuong,
+     *  dien tich lon nhat). Ap dung ca 4 goc — phieu that goc BR cung la o vuong. */
     private static Comp pick(List<Comp> cands, int w, int h,
                              boolean right, boolean bottom, boolean wantCircle) {
         List<Comp> inQ = new ArrayList<>();
@@ -233,13 +302,22 @@ public class OmrEngine {
             if ((c.cx < w / 2.0) == !right && (c.cy < h / 2.0) == !bottom) inQ.add(c);
         }
         if (inQ.isEmpty()) return null;
+        double cornerX = right ? w : 0, cornerY = bottom ? h : 0;
+        Comp bestSq = null;
+        double bestD2 = Double.MAX_VALUE;
+        for (Comp c : inQ) {
+            if (isCircle(c) || extent(c) <= 0.80) continue;
+            double dx = c.cx - cornerX, dy = c.cy - cornerY;
+            double d2 = dx * dx + dy * dy;
+            if (bestSq == null || d2 < bestD2 - 1e-9
+                    || (Math.abs(d2 - bestD2) <= 1e-9 && c.area > bestSq.area)) {
+                bestSq = c;
+                bestD2 = d2;
+            }
+        }
+        if (bestSq != null) return bestSq;
         List<Comp> pool = new ArrayList<>();
         for (Comp c : inQ) if (isCircle(c) == wantCircle) pool.add(c);
-        if (!wantCircle) {
-            List<Comp> sq = new ArrayList<>();
-            for (Comp c : pool) if (extent(c) > 0.80) sq.add(c);
-            if (!sq.isEmpty()) pool = sq;
-        }
         if (pool.isEmpty()) pool = inQ;
         Comp best = null;
         for (Comp c : pool) if (best == null || c.area > best.area) best = c;

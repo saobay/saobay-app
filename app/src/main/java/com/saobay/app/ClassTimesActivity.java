@@ -39,6 +39,7 @@ public class ClassTimesActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reminders);
+        NavStrip.build(this, findViewById(R.id.navStripRemind), "remind");
 
         tvToday = findViewById(R.id.tvToday);
         tvNext = findViewById(R.id.tvNext);
@@ -217,7 +218,7 @@ public class ClassTimesActivity extends Activity {
         }
         tvToday.setText(sb.toString().trim());
 
-        List<ReminderStore.Alert> alerts = ReminderStore.buildAlerts(this, 14);
+        List<ReminderStore.Alert> alerts = ReminderStore.buildAlerts(this, 7);
         if (alerts.isEmpty()) {
             tvNext.setText("Chưa có báo thức nào được đặt (lịch trống hoặc đã qua hết).");
         } else {
