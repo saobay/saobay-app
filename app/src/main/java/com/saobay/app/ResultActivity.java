@@ -72,12 +72,20 @@ public class ResultActivity extends Activity {
         if (codes.isEmpty()) codes.add("");
         spVersion.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, codes));
         int sel = 0;
+        boolean codeMismatch = false;
         if (!det.code.isEmpty()) {
             int idx = codes.indexOf(det.code);
             if (idx >= 0) sel = idx;
+            else codeMismatch = true;
         }
         spVersion.setSelection(sel);
         curCode = codes.get(sel);
+        if (codeMismatch) {
+            android.widget.Toast.makeText(this,
+                    "⚠️ Mã đề đọc trên phiếu là " + det.code + " — đề này chỉ có mã " + curCode
+                            + ", app đang chấm theo mã " + curCode + ". Kiểm tra lại mã đề trên phiếu!",
+                    android.widget.Toast.LENGTH_LONG).show();
+        }
         spVersion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                 curCode = (String) p.getItemAtPosition(pos);

@@ -172,10 +172,13 @@ public class CaptureActivity extends Activity {
 
     private void updateMap() {
         int vw = overlay.getWidth(), vh = overlay.getHeight();
-        if (vw == 0 || vh == 0 || uw == 0 || uh == 0) return;
-        viewMap = new ViewMap(vw, vh, uw, uh);
+        if (vw == 0 || vh == 0) return;
+        // Khung xanh chi phu thuoc kich thuoc man hinh: set NGAY khi co view,
+        // khong cho camera khoi tao xong (1.3.2: tranh truong hop khung khong hien).
         guideRect = guideRectFor(vw, vh);
         overlay.setGuide(guideRect);
+        if (uw == 0 || uh == 0) return;
+        viewMap = new ViewMap(vw, vh, uw, uh);
     }
 
     // ------------------------------------------------------------ camera2
